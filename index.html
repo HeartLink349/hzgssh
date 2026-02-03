@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Abu Zein & Om Zein</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@400;700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #7928ca; 
+            --secondary: #ff0080; 
+            --gold: #ffd700;
+            --neon-purple: #bc13fe;
+            --deep-dark: #050010;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #1a0033 0%, #000000 100%);
+            margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            font-family: 'Cairo', sans-serif; overflow-x: hidden; perspective: 1500px;
+            touch-action: manipulation;
+        }
+
+        #snow-canvas { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 1; }
+
+        .lights { 
+            position: absolute; top: 0; width: 100%; display: flex; 
+            justify-content: space-around; z-index: 10; padding: 15px 0;
+            filter: drop-shadow(0 0 10px white);
+        }
+        .light { 
+            width: 14px; height: 14px; border-radius: 50%; 
+            animation: blink 0.8s infinite alternate;
+        }
+        @keyframes blink { 
+            0% { opacity: 0.3; transform: scale(0.8); box-shadow: 0 0 5px currentColor; } 
+            100% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 25px currentColor; } 
+        }
+
+        .container { 
+            position: relative; width: 92%; max-width: 400px; height: 650px;
+            z-index: 5; transform-style: preserve-3d;
+        }
+
+        .card {
+            position: absolute; width: 100%; height: 100%; 
+            background: rgba(15, 0, 30, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 45px; padding: 25px 15px; text-align: center;
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.3);
+            display: flex; flex-direction: column; align-items: center;
+            opacity: 0; pointer-events: none;
+            transform: translateZ(-500px) rotateY(90deg);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box;
+            border: 2px solid rgba(188, 19, 254, 0.5);
+            visibility: hidden;
+            color: white;
+        }
+
+        #step3 { height: 90vh; overflow-y: auto; overflow-x: hidden; display: block; scroll-behavior: smooth; }
+
+        .active-card { 
+            opacity: 1 !important; 
+            pointer-events: auto !important; 
+            transform: translateZ(0) rotateY(0deg) !important; 
+            z-index: 5; 
+            visibility: visible;
+        }
+
+        .exit-card { opacity: 0 !important; transform: translateZ(500px) rotateY(-90deg) !important; }
+
+        .user-img { 
+            width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--neon-purple); box-shadow: 0 0 20px var(--neon-purple);
+            margin-bottom: 15px;
+        }
+
+        .main-brand { 
+            font-family: 'Amiri', serif; 
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: #fff; 
+            margin: 15px 0 5px 0; 
+            text-shadow: 0 0 15px var(--neon-purple);
+            white-space: nowrap;
+        }
+
+        .sub-brand {
+            font-family: 'Cairo', sans-serif;
+            font-size: clamp(0.75rem, 3vw, 0.85rem);
+            color: var(--gold);
+            margin-bottom: 15px;
+            opacity: 0.9;
+            width: 95%;
+            line-height: 1.4;
+        }
+        
+        input {
+            width: 90%; height: 50px; border-radius: 15px; border: 1px solid var(--neon-purple);
+            margin: 10px 0; text-align: center; font-size: 1.1rem; 
+            background: rgba(255,255,255,0.1); color: #fff;
+        }
+
+        .unlock-btn { 
+            width: 90%; min-height: 55px; border-radius: 18px; border: none; 
+            background: linear-gradient(45deg, var(--primary), var(--secondary)); 
+            color: white; font-weight: bold; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(255, 0, 128, 0.3);
+        }
+
+        .content-box {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 1px solid rgba(188, 19, 254, 0.3);
+            border-radius: 25px;
+            padding: 20px;
+            margin: 20px auto;
+            width: 85%;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .content-img { width: 100%; border-radius: 15px; border: 2px solid rgba(188, 19, 254, 0.2); }
+        
+        audio, video { width: 100%; margin: 10px 0; border-radius: 12px; }
+        video { border: 1px solid var(--secondary); background: #000; }
+
+        .heart { position: absolute; bottom: -10%; z-index: 100; animation: flyUp 3s forwards linear; pointer-events: none; }
+        @keyframes flyUp { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(-1000px) rotate(360deg); opacity: 0; } }
+        
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+
+        #step3::-webkit-scrollbar { width: 5px; }
+        #step3::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <canvas id="snow-canvas"></canvas>
+    <div class="lights" id="top-lights"></div>
+
+    <audio id="myAudio" loop><source src="https://files.catbox.moe/vsab4f.mp3" type="audio/mpeg"></audio>
+
+    <div class="container" id="cardContainer">
+        <div id="step1" class="card active-card">
+            <div style="margin-top: 30px;"></div>
+            <span style="font-size: 4rem;">🎁</span>
+            <h1 class="main-brand">Abu Zein & Om Zein</h1>
+            <p class="sub-brand">فتلاقت الارواح بعد شتاها وحن علينا العمر وابتسم القدر ❤️👸🏻💍</p>
+            <p style="color: rgba(255,255,255,0.8);">جاهزة يا زوزه👸🏻🤍</p>
+            <input type="text" id="passCode" placeholder="التاريخ المميز (يوم/شهر) ✨" onkeypress="handleEnter(event)">
+            <button class="unlock-btn" id="loginBtn" onclick="checkPassword()">ادخلي عالمك الخاص ✨</button>
+        </div>
+
+        <div id="step2" class="card">
+            <img src="https://files.catbox.moe/nnoylj.jpg" class="user-img">
+            <h3 style="color: var(--gold); margin: 10px 0;">رسالة من قلبي..</h3>
+            <div style="font-size: 0.95rem; line-height: 1.8; overflow-y: auto; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 20px; border: 1px solid var(--neon-purple);">
+                <p>عارف اني بزعلك كتير و مشكلنا كتير الفتره دي. حقك عليا ي نور عيني اني اتعصبت عليكي ولا عملت اي حاجه تزعلك مني و تحسسك اني غريب عنك بس والله أنا مليش غيرك ف الدنيا دي انتي اهلي وصحابي وسندي ودنيتي كلها وعيني الي بشوف بيها كماان اوعي تملي مني ف يوم من الايام علشان انتي عارفه اني عمري محبيت حد غيرك و مش عايز حد غيرك ❤️❤️❤️❤️❤️❤️🥹🏡</p>
+            </div>
+            <button class="unlock-btn" onclick="nextStep(2, 3)" style="margin-top: auto; margin-bottom: 10px;">دوسي هنا ✨</button>
+        </div>
+
+        <div id="step3" class="card">
+            <h2 style="font-family: 'Amiri'; color: var(--gold); margin-top: 20px; text-shadow: 0 0 10px var(--gold);">ذكرياتنا الحلوة 💖</h2>
+            
+            <div class="content-box">
+                <img src="https://l.top4top.io/p_3685y2zh51.jpg" class="content-img">
+            </div>
+
+            <div class="content-box">
+                <p style="font-weight: bold;">لأنك المكان الذي يناسبني ألجأ دائما إليك 🫀🤎<br>
+                <span style="font-size: 0.9rem; opacity: 0.8;">Because you are the place that suits me . I turn to you 🫀🤎.</span></p>
+            </div>
+
+            <div class="content-box">
+                <audio class="media-element" controls><source src="https://e.top4top.io/m_368519qki1.mp4" type="audio/mpeg"></audio>
+            </div>
+
+            <div class="content-box">
+                <img src="https://a.top4top.io/p_36854rfbx1.jpg" class="content-img">
+            </div>
+
+            <div class="content-box" style="font-size: 1rem; line-height: 1.7;">
+                تهت بوصفك فقد بلغت حسنا<br>فنبعثرت اشعاري وكل كلماتي<br>فلا قولي استقام مقاما ولا ركنا<br>وكيف يحسن النظم بلا كلمات<br>فليس من عرفآ ان اشعر في غيرك غزلآ<br>بل كيف يدرك القلم بحضرة المنيفاتي❤✨
+            </div>
+
+            <div class="content-box">
+                <audio class="media-element" controls><source src="https://g.top4top.io/m_3685b9hgj1.mp4" type="audio/mpeg"></audio>
+            </div>
+
+            <div class="content-box">
+                <img src="https://b.top4top.io/p_36853ggtn1.jpg" class="content-img">
+            </div>
+
+            <div class="content-box" style="font-size: 0.95rem; line-height: 1.7;">
+                ماذا تريدين ..قلبي ؟انتي زهرته ،ماذا تريدين ..عمري ؟انت اعماري ،لو تطلبين عيوني لست امنعها .ياغيمه حملت في الصيف امطاري .اشتقت صوتك صبحا حين يوقضني .وحين ليلا يغني حلو اشعاري .إني احبك ..لو تدرين كم قمرٍ ،يحوم فوقي ويغرني بانوارِ.عودي الي..عيوني كلها امل .بأن تراك حوليها وأنضاري
+            </div>
+
+            <div class="content-box">
+                <audio class="media-element" controls><source src="https://f.top4top.io/m_3685rpo5u1.mp4" type="audio/mpeg"></audio>
+            </div>
+
+            <div class="content-box"><img src="https://c.top4top.io/p_36856ajyp1.jpg" class="content-img"></div>
+            <div class="content-box"><audio class="media-element" controls><source src="https://e.top4top.io/m_3685x83a21.mp4" type="audio/mpeg"></audio></div>
+            <div class="content-box"><img src="https://e.top4top.io/p_3685pnof51.jpg" class="content-img"></div>
+            <div class="content-box"><img src="https://g.top4top.io/p_3685jxkay1.jpg" class="content-img"></div>
+            <div class="content-box"><img src="https://h.top4top.io/p_3685bfel31.jpg" class="content-img"></div>
+            <div class="content-box"><img src="https://d.top4top.io/p_36851e3wt1.jpg" class="content-img"></div>
+            <div class="content-box"><img src="https://i.top4top.io/p_3685jovth1.jpg" class="content-img"></div>
+            <div class="content-box"><img src="https://j.top4top.io/p_36855fm5y1.jpg" class="content-img"></div>
+            <div class="content-box"><img src="https://k.top4top.io/p_3685une4a1.jpg" class="content-img"></div>
+
+            <div class="content-box">
+                <img src="https://b.top4top.io/p_3686dcq1e1.jpg" class="content-img">
+                <p style="margin-top: 10px; font-weight: bold;">كل التواريخ عاديه الا هذا التاريخ 🥹❤️</p>
+            </div>
+
+            <div class="content-box">
+                <p style="color: var(--secondary); font-weight: bold;">فيديوهات حكاية ❤️</p>
+                <video class="media-element" controls><source src="https://l.top4top.io/m_36851d3xv1.mp4" type="video/mp4"></video>
+                <video class="media-element" controls><source src="https://a.top4top.io/m_3685t71d31.mp4" type="video/mp4"></video>
+                <video class="media-element" controls><source src="https://b.top4top.io/m_36856wq211.mp4" type="video/mp4"></video>
+                <video class="media-element" controls><source src="https://c.top4top.io/m_3685w7tvz1.mp4" type="video/mp4"></video>
+                <video class="media-element" controls><source src="https://d.top4top.io/m_3685it5241.mp4" type="video/mp4"></video>
+                <video class="media-element" controls><source src="https://e.top4top.io/m_3685qg2mf1.mp4" type="video/mp4"></video>
+            </div>
+
+            <button class="unlock-btn" onclick="location.reload()" style="margin-bottom: 40px;">نبدأ من جديد؟ ♾️</button>
+        </div>
+    </div>
+
+    <script>
+        const bgAudio = document.getElementById('myAudio');
+        const mediaElements = document.querySelectorAll('.media-element');
+
+        mediaElements.forEach(media => {
+            media.onplay = () => {
+                bgAudio.pause();
+                mediaElements.forEach(m => { if(m !== media) m.pause(); });
+            };
+            media.onpause = () => {
+                const isAnythingPlaying = Array.from(mediaElements).some(m => !m.paused);
+                if(!isAnythingPlaying) bgAudio.play();
+            };
+            media.onended = () => {
+                bgAudio.play();
+            };
+        });
+
+        const lightsContainer = document.getElementById('top-lights');
+        const colors = ['#bc13fe', '#7928ca', '#ff0080', '#ffd700'];
+        for(let i=0; i<15; i++) {
+            const light = document.createElement('div');
+            light.className = 'light';
+            light.style.color = colors[i % colors.length];
+            light.style.backgroundColor = colors[i % colors.length];
+            light.style.animationDelay = (i * 0.1) + 's';
+            lightsContainer.appendChild(light);
+        }
+
+        function checkPassword() {
+            const pass = document.getElementById('passCode').value;
+            if(pass === "17/1") {
+                bgAudio.play().catch(e => {});
+                nextStep(1, 2);
+            } else {
+                const btn = document.getElementById('loginBtn');
+                btn.classList.add('shake');
+                setTimeout(() => btn.classList.remove('shake'), 500);
+            }
+        }
+
+        function nextStep(current, next) {
+            const currentCard = document.getElementById('step' + current);
+            currentCard.classList.add('exit-card');
+            setTimeout(() => {
+                currentCard.classList.remove('active-card', 'exit-card');
+                document.getElementById('step' + next).classList.add('active-card');
+                if(next === 2) startCelebration();
+            }, 800);
+        }
+
+        function handleEnter(e) { if(e.key === "Enter") checkPassword(); }
+
+        function startCelebration() {
+            const emojis = ['❤️','💖','✨','💝'];
+            for(let i=0; i<40; i++) {
+                setTimeout(() => {
+                    const h = document.createElement('div');
+                    h.innerHTML = emojis[Math.floor(Math.random()*emojis.length)];
+                    h.className = 'heart';
+                    h.style.left = Math.random() * 100 + '%';
+                    h.style.fontSize = Math.random() * 20 + 20 + 'px';
+                    document.body.appendChild(h);
+                    setTimeout(() => h.remove(), 3000);
+                }, i * 150);
+            }
+        }
+
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, snowflakes = [];
+        function initSnow() {
+            width = window.innerWidth; height = window.innerHeight;
+            canvas.width = width; canvas.height = height;
+            snowflakes = [];
+            for(let i=0; i<80; i++) snowflakes.push({ x: Math.random() * width, y: Math.random() * height, r: Math.random() * 3 + 1, d: Math.random() * 1 });
+        }
+        function drawSnow() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = "rgba(188, 19, 254, 0.3)"; ctx.beginPath();
+            for(let i=0; i<snowflakes.length; i++) {
+                let p = snowflakes[i]; ctx.moveTo(p.x, p.y); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2, true);
+            }
+            ctx.fill(); moveSnow();
+        }
+        function moveSnow() {
+            for(let i=0; i<snowflakes.length; i++) {
+                let p = snowflakes[i]; p.y += Math.cos(p.d) + 1 + p.r/2; p.x += Math.sin(p.d) * 1;
+                if(p.y > height) snowflakes[i] = {x: Math.random()*width, y: -10, r: p.r, d: p.d};
+            }
+        }
+        window.addEventListener('resize', initSnow);
+        initSnow(); setInterval(drawSnow, 30);
+    </script>
+</body>
+</html>
